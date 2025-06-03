@@ -13,7 +13,6 @@
 - Instant summaries of user flows + session durations
 - Send reports directly to Notion
 - Self-hostable via Docker 🐳
-- Brave/adblock evasion with stealth tracker
 
 ---
 
@@ -23,7 +22,7 @@
 - Python (summarizer + Notion integration)
 - JavaScript (client-side tracker)
 - Docker for packaging everything
-- Optional: Notion + Imgbb for reporting
+- Notion + Imgbb for reporting
 
 ---
 
