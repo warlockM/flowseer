@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"path": "../../customJS-flowseer"
+		},
+		{
+			"path": "../../orange-front/orange-front"
+		}
+	],
+	"settings": {}
+}

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Flowseer Config & Secrets</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 700px;
+      margin: 2rem auto;
+      padding: 1.5rem;
+      background: #f5f5f5;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    h2 { color: #ff7300; }
+    label { display: block; margin-top: 1rem; font-weight: bold; }
+    input[type="text"] {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.25rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      margin-top: 1.5rem;
+      padding: 0.75rem 1.25rem;
+      background-color: #ff7300;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .success { margin-top: 1rem; color: green; }
+    .error { margin-top: 1rem; color: red; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h2>⚙️ Flowseer Configuration & Secrets</h2>
+
+  <form id="combined-form">
+    <!-- CONFIG VALUES -->
+    <label>Conversion URLs (comma separated)</label>
+    <input type="text" name="CONVERSION_URLS" placeholder="/checkout,/success" />
+
+    <label>Conversion Event Types</label>
+    <input type="text" name="CONVERSION_EVENT_TYPES" placeholder="conversion,goal_reached" />
+
+    <label>Click Labels</label>
+    <input type="text" name="CONVERSION_CLICK_LABELS" placeholder="Completed,Buy Now" />
+
+    <!-- SECRETS -->
+    <label>Notion API Token</label>
+    <input type="text" name="NOTION_API_SECRET" placeholder="secret_xxx..." />
+
+    <label>Notion Page ID</label>
+    <input type="text" name="NOTION_PAGE_ID" placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" />
+
+    <label>imgbb API Key</label>
+    <input type="text" name="IMGBB_KEY" placeholder="abc123..." />
+
+    <button type="submit">🚀 Upload</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script>
+    const form = document.getElementById("combined-form");
+    const result = document.getElementById("result");
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      result.innerHTML = "";
+
+      const formData = new FormData(form);
+
+      // Split into config + secrets
+      const configData = {
+        CONVERSION_URLS: formData.get("CONVERSION_URLS"),
+        CONVERSION_EVENT_TYPES: formData.get("CONVERSION_EVENT_TYPES"),
+        CONVERSION_CLICK_LABELS: formData.get("CONVERSION_CLICK_LABELS")
+      };
+
+      const secretsData = {
+        NOTION_API_SECRET: formData.get("NOTION_API_SECRET"),
+        NOTION_PAGE_ID: formData.get("NOTION_PAGE_ID"),
+        IMGBB_KEY: formData.get("IMGBB_KEY")
+      };
+
+      try {
+        const [configRes, secretsRes] = await Promise.all([
+          fetch("/api/collections/config/records", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...configData })
+          }),
+          fetch("/api/collections/secrets/records", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...secretsData })
+          })
+        ]);
+
+        const configJson = await configRes.json();
+        const secretsJson = await secretsRes.json();
+
+        if (configRes.ok && secretsRes.ok) {
+          result.innerHTML = `<div class="success">✅ Uploaded both config and secrets!</div>`;
+        } else {
+          result.innerHTML = `<div class="error">❌ Errors:\n${JSON.stringify({ config: configJson, secrets: secretsJson }, null, 2)}</div>`;
+        }
+
+      } catch (err) {
+        result.innerHTML = `<div class="error">❌ JS error: ${err.message}</div>`;
+      }
+    };
+  </script>
+</body>
+</html>

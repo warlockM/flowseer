@@ -1,0 +1,20 @@
+version: "3.9"
+
+services:
+  flowseer:
+    container_name: flowseer
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8090:8090"
+    environment:
+      # These are used in entrypoint.sh to create the admin user
+      PB_ADMIN_EMAIL: admin@flowseer.local
+      PB_ADMIN_PASSWORD: supersecret123
+    volumes:
+      # Store PocketBase database outside container
+      - ./pb_data:/app/pb_data
+      # Optional: If you want to make logs/env persist
+      - ./logs:/app/logs
+    restart: unless-stopped
